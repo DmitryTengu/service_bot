@@ -1,12 +1,9 @@
 """Список всех обработчиков. Новый файл с обработчиками подключается одной строкой здесь."""
 
-from bot.handlers import admin, menu, my_ads, post, report, search
+from bot.handlers import admin, menu
 
+# Порядок важен: menu ловит все остальные сообщения, поэтому он последний
 ROUTERS = [
-    menu.router,
     admin.router,
-    search.router,
-    my_ads.router,
-    post.router,
-    report.router,
+    menu.router,
 ]

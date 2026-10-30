@@ -15,10 +15,11 @@ from bot.handlers import ROUTERS
 logger = logging.getLogger(__name__)
 
 # Меню команд рядом с полем ввода: короткие русские названия вместо набора команд
-BOT_COMMANDS = [
-    BotCommand(command="menu", description="Меню"),
-    BotCommand(command="cancel", description="Отмена"),
-]
+BOT_COMMANDS = [BotCommand(command="menu", description="Открыть каталог")]
+MISSING_WEBAPP_URL = (
+    "Не задан WEBAPP_URL. Всё делается в Mini App, без него боту нечего показать "
+    "(см. раздел Mini App в README)."
+)
 
 
 def _app_menu_button(url: str) -> MenuButtonWebApp:
@@ -28,6 +29,8 @@ def _app_menu_button(url: str) -> MenuButtonWebApp:
 
 async def main() -> None:
     settings = load_settings()
+    if not settings.webapp_url:
+        raise SystemExit(MISSING_WEBAPP_URL)
     if not settings.auto_approve and not settings.admin_ids:
         logger.warning("ADMIN_IDS пуст, а AUTO_APPROVE выключен: проверять объявления некому.")
     db = Database(settings.db_path)
@@ -39,8 +42,7 @@ async def main() -> None:
     dispatcher = Dispatcher(db=db, settings=settings)
     dispatcher.include_routers(*ROUTERS)
     await bot.set_my_commands(BOT_COMMANDS)
-    if settings.webapp_url:
-        await bot.set_chat_menu_button(menu_button=_app_menu_button(settings.webapp_url))
+    await bot.set_chat_menu_button(menu_button=_app_menu_button(settings.webapp_url))
     await dispatcher.start_polling(bot)
 
 

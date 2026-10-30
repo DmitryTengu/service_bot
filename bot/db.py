@@ -128,10 +128,6 @@ class Database:
             )
             return cursor.lastrowid
 
-    def _count_live_ads(self, user_id: int) -> int:
-        with self._connect() as conn:
-            return self._count_live(conn, user_id)
-
     def _get_ad(self, ad_id: int) -> dict | None:
         with self._connect() as conn:
             row = conn.execute(_SELECT_AD + " WHERE ads.id = ?", (ad_id,)).fetchone()
@@ -239,10 +235,6 @@ class Database:
         """Создаёт объявление и возвращает его номер. При превышении лимита: LimitReached."""
         return await asyncio.to_thread(self._create_ad, user_id, fields, auto_approve)
 
-    async def count_live_ads(self, user_id: int) -> int:
-        """Сколько у человека объявлений на проверке и опубликованных (они идут в лимит)."""
-        return await asyncio.to_thread(self._count_live_ads, user_id)
-
     async def get_ad(self, ad_id: int) -> dict | None:
         """Объявление с данными автора или None."""
         return await asyncio.to_thread(self._get_ad, ad_id)
@@ -268,10 +260,6 @@ class Database:
         Без category ищет по всем категориям, query ищет в названии и описании без учёта регистра.
         """
         return await asyncio.to_thread(self._search, category, query, page)
-
-    async def list_by_category(self, category: str, page: int = 0) -> tuple[list[dict], int]:
-        """Опубликованные объявления категории на странице (с нуля) и общее их число."""
-        return await self.search(category=category, page=page)
 
     async def list_by_user(self, user_id: int) -> list[dict]:
         """Все объявления одного автора, новые первыми."""

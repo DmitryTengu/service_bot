@@ -23,7 +23,8 @@ class Settings:
     admin_ids: frozenset[int]
     db_path: Path
     auto_approve: bool
-    # Публичный HTTPS-адрес Mini App; пустой, если веб-приложение не используется
+    # Публичный HTTPS-адрес Mini App. Боту обязателен (это проверяет bot.main), а сервер
+    # Mini App запускается и без него: адрес туннеля бывает известен только после запуска
     webapp_url: str = ""
     port: int = DEFAULT_PORT
 

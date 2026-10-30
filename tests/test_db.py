@@ -53,18 +53,18 @@ class CreateAndApproveTests(DatabaseTestCase):
 
     async def test_pending_ad_is_not_in_catalog_until_approved(self):
         ad_id = await self.add_ad()
-        self.assertEqual((await self.db.list_by_category("it"))[1], 0)
+        self.assertEqual((await self.db.search(category="it"))[1], 0)
         self.assertEqual([ad["id"] for ad in await self.db.list_pending()], [ad_id])
 
         self.assertTrue(await self.db.set_status(ad_id, ACTIVE))
-        ads, total = await self.db.list_by_category("it")
+        ads, total = await self.db.search(category="it")
         self.assertEqual((total, [ad["id"] for ad in ads]), (1, [ad_id]))
         self.assertEqual(await self.db.list_pending(), [])
 
     async def test_rejected_ad_is_not_in_catalog(self):
         ad_id = await self.add_ad()
         await self.db.set_status(ad_id, REJECTED)
-        self.assertEqual((await self.db.list_by_category("it"))[1], 0)
+        self.assertEqual((await self.db.search(category="it"))[1], 0)
 
     async def test_unknown_ad_status_change_returns_false(self):
         self.assertFalse(await self.db.set_status(999, ACTIVE))
@@ -88,7 +88,7 @@ class LimitTests(DatabaseTestCase):
         await self.fill_limit()
         with self.assertRaises(LimitReached):
             await self.add_ad()
-        self.assertEqual(await self.db.count_live_ads(1), MAX_LIVE_ADS)
+        self.assertEqual(len(await self.db.list_by_user(1)), MAX_LIVE_ADS)
 
     async def test_limit_is_per_user(self):
         await self.fill_limit()
@@ -128,10 +128,10 @@ class PaginationTests(DatabaseTestCase):
         total_ads = PAGE_SIZE * 2 + 3
         await self.add_many_active(total_ads)
 
-        first, total = await self.db.list_by_category("it", 0)
-        second, _ = await self.db.list_by_category("it", 1)
-        third, _ = await self.db.list_by_category("it", 2)
-        beyond, _ = await self.db.list_by_category("it", 3)
+        first, total = await self.db.search(category="it", page=0)
+        second, _ = await self.db.search(category="it", page=1)
+        third, _ = await self.db.search(category="it", page=2)
+        beyond, _ = await self.db.search(category="it", page=3)
 
         self.assertEqual(total, total_ads)
         self.assertEqual(
@@ -143,8 +143,8 @@ class PaginationTests(DatabaseTestCase):
 
     async def test_other_category_is_not_mixed_in(self):
         await self.add_ad(auto_approve=True, category="beauty")
-        self.assertEqual((await self.db.list_by_category("it"))[1], 0)
-        self.assertEqual((await self.db.list_by_category("beauty"))[1], 1)
+        self.assertEqual((await self.db.search(category="it"))[1], 0)
+        self.assertEqual((await self.db.search(category="beauty"))[1], 1)
 
 
 class SearchTests(DatabaseTestCase):

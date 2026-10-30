@@ -1,9 +1,8 @@
-"""Команды /start и /menu, кнопки «Помощь» и «Открыть каталог»."""
+"""Команды /start и /menu и ответ на всё остальное: всё делается в Mini App."""
 
-from aiogram import F, Router
+from aiogram import Router
 from aiogram.filters import Command
-from aiogram.fsm.context import FSMContext
-from aiogram.types import Message
+from aiogram.types import CallbackQuery, Message, ReplyKeyboardRemove
 
 from bot import keyboards, texts
 from bot.config import Settings
@@ -13,30 +12,27 @@ router = Router()
 
 
 @router.message(Command("start", "menu"))
-async def open_menu(message: Message, state: FSMContext, db: Database, settings: Settings) -> None:
-    """Сбрасывает незаконченный диалог, запоминает пользователя и показывает меню."""
-    await state.clear()
+async def open_menu(message: Message, db: Database, settings: Settings) -> None:
+    """Запоминает пользователя и даёт кнопку каталога.
+
+    ReplyKeyboardRemove убирает нижние кнопки, оставшиеся от прежней версии бота.
+    """
     user = message.from_user
     if user is not None:
         await db.save_user(user.id, user.username, user.first_name)
-    app_enabled = bool(settings.webapp_url)
-    await message.answer(texts.WELCOME, reply_markup=keyboards.main_menu(app_enabled))
-    if app_enabled:
-        await message.answer(
-            texts.OPEN_APP_PROMPT, reply_markup=keyboards.open_app(settings.webapp_url)
-        )
+    await message.answer(texts.WELCOME, reply_markup=ReplyKeyboardRemove())
+    await message.answer(
+        texts.OPEN_APP_PROMPT, reply_markup=keyboards.open_app(settings.webapp_url)
+    )
 
 
-@router.message(F.text == texts.BTN_OPEN_APP)
-async def open_app(message: Message, state: FSMContext, settings: Settings) -> None:
-    await state.clear()
-    if settings.webapp_url:
-        await message.answer(
-            texts.OPEN_APP_PROMPT, reply_markup=keyboards.open_app(settings.webapp_url)
-        )
+@router.message()
+async def point_to_app(message: Message, settings: Settings) -> None:
+    """Любое другое сообщение: в чате ничего не делается, только в каталоге."""
+    await message.answer(texts.MENU_HINT, reply_markup=keyboards.open_app(settings.webapp_url))
 
 
-@router.message(F.text == texts.BTN_HELP)
-async def show_help(message: Message, state: FSMContext) -> None:
-    await state.clear()
-    await message.answer(texts.HELP)
+@router.callback_query()
+async def outdated_button(callback: CallbackQuery) -> None:
+    """Кнопки под старыми сообщениями больше ничего не делают; без ответа они бы «крутились»."""
+    await callback.answer(texts.BUTTON_OUTDATED, show_alert=True)

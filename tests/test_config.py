@@ -1,9 +1,11 @@
 """Тесты чтения настроек из окружения (без чтения настоящего .env)."""
 
+import asyncio
 import os
 import unittest
 from unittest import mock
 
+from bot import main as bot_main
 from bot.config import DEFAULT_DB_PATH, DEFAULT_PORT, load_settings
 
 BASE_ENV = {"BOT_TOKEN": "123456:TEST-TOKEN-NOT-REAL"}
@@ -53,6 +55,17 @@ class SettingsTests(unittest.TestCase):
             self.assertRaises(SystemExit),
         ):
             load_settings()
+
+
+class BotStartTests(unittest.TestCase):
+    def test_bot_refuses_to_start_without_webapp_url(self):
+        # Падает до создания бота, поэтому в Telegram ничего не уходит
+        with (
+            mock.patch("bot.main.load_settings", return_value=settings_from()),
+            self.assertRaises(SystemExit) as raised,
+        ):
+            asyncio.run(bot_main.main())
+        self.assertIn("WEBAPP_URL", str(raised.exception))
 
 
 if __name__ == "__main__":
