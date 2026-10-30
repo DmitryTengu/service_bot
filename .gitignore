@@ -1,0 +1,41 @@
+# Секреты: токен бота лежит только здесь
+.env
+.env.*
+!.env.example
+
+# Файлы базы данных
+*.db
+*.sqlite
+*.sqlite3
+data/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+build/
+dist/
+
+# Виртуальные окружения
+.venv/
+venv/
+env/
+
+# Кэши инструментов и отчёты
+.ruff_cache/
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Редакторы
+.idea/
+.vscode/
+
+# Локальные настройки Claude Code
+.claude/settings.local.json
+
+# Системные файлы
+.DS_Store
+Thumbs.db

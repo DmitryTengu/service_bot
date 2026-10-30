@@ -1,0 +1,42 @@
+/* Все цвета, размеры и отступы живут здесь; в остальных файлах только var(--...). */
+:root {
+  /* Цвета макета */
+  --color-bg: #0e2a20;
+  --color-surface: #15382b;
+  --color-border: #2f5e4a;
+  --color-text: #f6f1e3;
+  --color-text-muted: #c5d3c8;
+  --color-accent: #e2be6a;
+  --color-on-accent: #0e2a20;
+  /* Ошибки и удаление: контраст на карточке не ниже 7:1 */
+  --color-danger: #ffb3a7;
+  /* Рамка полей ввода светлее декоративной, чтобы поле хорошо различалось на тёмном фоне */
+  --color-field-border: var(--color-text-muted);
+
+  /* Шрифт */
+  --font-family: "Manrope", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-size-body: 19px; /* основной текст: не меньше 19px */
+  --font-size-caption: 17px; /* подписи: не меньше 17px */
+  --font-size-title: 26px;
+  --font-size-price: 22px;
+  --line-height: 1.45;
+
+  /* Размеры управления: кнопки не ниже 56px */
+  --control-height: 56px;
+  --tabbar-height: 68px;
+  --icon-size: 24px;
+  --icon-size-large: 32px;
+
+  /* Отступы и скругления */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --radius: 16px;
+  --radius-small: 12px;
+  --border-width: 2px;
+  --focus-ring: 3px solid var(--color-accent);
+  --content-max-width: 640px;
+}
