@@ -112,6 +112,16 @@ class AuthTests(ApiTestCase):
                     self.client.get("/api/my/listings", headers=headers).status_code, 401
                 )
 
+    def test_rejection_reason_is_logged_without_secrets(self):
+        headers = headers_for(AUTHOR, token="999:OTHER")
+        with self.assertLogs("webapp.api", level="WARNING") as logs:
+            self.assertEqual(self.client.get("/api/listings", headers=headers).status_code, 401)
+        logged = "\n".join(logs.output)
+        self.assertIn("подпись не совпала", logged)
+        init_data = headers["Authorization"].removeprefix("tma ")
+        for secret in (BOT_TOKEN, init_data, "hash="):
+            self.assertNotIn(secret, logged)
+
     def test_every_method_except_categories_requires_user(self):
         ad_id = self.add_ad()
         calls = [

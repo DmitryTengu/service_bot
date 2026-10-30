@@ -55,6 +55,9 @@ class ValidInitDataTests(unittest.TestCase):
     def test_small_clock_skew_is_accepted(self):
         check(make_init_data(auth_date=NOW + CLOCK_SKEW_SECONDS))
 
+    def test_server_clock_few_minutes_behind_is_accepted(self):
+        check(make_init_data(auth_date=NOW + 4 * 60))
+
 
 class ForgeryTests(unittest.TestCase):
     def test_signed_with_another_token_is_rejected(self):

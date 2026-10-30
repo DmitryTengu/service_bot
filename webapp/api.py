@@ -1,5 +1,6 @@
 """Методы API Mini App. Все права проверяются здесь, на сервере, а не на странице."""
 
+import logging
 import re
 from dataclasses import dataclass
 from typing import Annotated
@@ -51,6 +52,7 @@ _VALUE_ERROR_PREFIX = "Value error, "
 LIMIT_MESSAGE = f"Достигнут лимит объявлений: {MAX_LIVE_ADS}. Скройте или удалите одно."
 
 router = APIRouter(prefix="/api")
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -80,7 +82,9 @@ async def current_user(
         raise HTTPException(401, "Откройте приложение из Telegram.")
     try:
         user = validate_init_data(init_data, ctx.settings.bot_token)
-    except AuthError:
+    except AuthError as error:
+        # В AuthError только короткая причина без самих данных, поэтому её безопасно писать в лог
+        logger.warning("Вход в Mini App отклонён: %s", error)
         raise HTTPException(401, "Не удалось проверить вас. Откройте приложение заново.") from None
     if not await is_member(user.id):
         raise HTTPException(403, "Доступ закрыт.")
